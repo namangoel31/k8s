@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: service-account-for-image-prepuller
+  namespace: <namespace>
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<role-name>
+
+#NOTE-1: the IAM role in annotations should have appropriate trust policy. refere IAMrolesForSvcAcnt section, manually/IRSAmanuallyDeclarative.yaml
+#NOTE-2: the role you attach should have appropriate permissions for pulling images from ECR.

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: image-prepuller
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: image-prepuller
+  template:
+    metadata:
+      labels:
+        app: image-prepuller
+    spec:
+      serviceAccountName: service-account-for-image-prepuller
+      #hostPID: true #the Pod can interact with host processes directly. Possible security risks. More at bottom of the file, Section 1.
+      tolerations:
+      - operator: "Exists" # run on all nodes
+      containers:
+      - name: prepuller
+        image: <prePullerImage>
+        securityContext:
+          #privileged: true #granting full access to the host's kernel. More at bottom of the file, Section 2.
+          runAsUser: 0  #(root)
+          runAsGroup: 0  #(root)
+          capabilities:
+            drop: ["ALL"]
+        volumeMounts:
+        - name: runtime-sock
+          mountPath: /run/containerd/containerd.sock
+        - name: image-list
+          mountPath: /etc/images.txt
+          subPath: images.txt
+      volumes:
+      - name: runtime-sock
+        hostPath:
+          path: /run/containerd/containerd.sock
+      - name: image-list
+        configMap:
+          name: prepuller-images
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prepuller-images
+  namespace: kube-system
+data:
+  images.txt: |
+    <image-1-to-pull>
+    <image-2-to-pull>
+    <image-3-to-pull>
+
+
+# SECTION 1: hostPID: true
+# The spec.hostPID field in a Kubernetes Pod specification determines whether the Pod shares the host's process ID (PID) namespace. 
+# By setting hostPID: true, the containers within the Pod gain visibility into all processes running on the host system. 
+# This can be useful for debugging or monitoring but introduces significant security risks.
+# This capability should be used cautiously due to its potential to expose sensitive host information
+
+#SECTION 2: privileged: true
+# A privileged container in Kubernetes has elevated permissions, granting it full access to the host's kernel
+# Privileged containers can access host resources like /proc and /sys, potentially compromising the host system.
+# By default, Kubernetes containers are non-privileged unless explicitly configured otherwise
+# Instead of using privileged mode, you can grant specific Linux capabilities (e.g., NET_ADMIN) to meet application requirements without exposing the entire system.
+
+#ets: scoreItNow
