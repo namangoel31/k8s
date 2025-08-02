@@ -1,6 +1,7 @@
 # IRSA
 
 ## PRE-REQUISITE: OIDC PROVIDER FOR THE CLUSTER
+To use AWS Identity and Access Management (IAM) roles for service accounts, an IAM OIDC provider must exist for your cluster’s OIDC issuer URL
 
 ## Create a policy
 -> create a JSON policy doc with all the required permissions
