@@ -7,7 +7,7 @@ spec:
   template:
     spec:
       containers:
-        - image: 552672526249.dkr.ecr.ap-south-1.amazonaws.com/gz-filemanager-api-image-ci:latest
+        - image: image-ci:latest
           env:
             - name: nmspc
               value: dev-dev
@@ -18,7 +18,7 @@ spec:
 
 #this knative service did not work with tag in the image URI. it had to be replaced with digest/hash
 # WHAT DID NOT WORK: 
-  # 552672526249.dkr.ecr.ap-south-1.amazonaws.com/gz-filemanager-api-image-ci:latest
-    # Unable to fetch image "5549.dkr.ecr.ap-south-1.amazonaws.com/gz-filemanager-api-image-ci:latest": failed to resolve image to digest: Get "https://55249.dkr.ecr.ap-south-1.amazonaws.com/v2/": context deadline exceeded
+  # image-ci:latest
+    # Unable to fetch image "image-ci:latest": failed to resolve image to digest: Get "amazonaws.com/v2/": context deadline exceeded
 # WHAT WORKED:
-  # 552672526249.dkr.ecr.ap-south-1.amazonaws.com/gz-filemanager-api-image-ci@sha256:dfe0d2d4e91d7f0b1b2de7599ec50b438f7ed892a70801d60fedfe46a142d606
+  # amazonaws.com/image-ci@sha256:dfe0d2d4e91d7f0b1b2de7599

@@ -1,0 +1,58 @@
+# An example of ClusterConfig object using an existing VPC:
+--- 
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: <clusterName>
+  region: <region>
+
+iam:
+  withOIDC: true #To create and associate an OIDC provider
+
+autoModeConfig:
+  enabled: true
+  #noedPools: []string, [general-purpose, system]
+  #nodeRoleARN: string
+accessConfig:
+  authenticationMode: API_AND_CONFIG_MAP
+vpc:
+  id: <vpc-01>  # (optional, must match VPC ID used for each subnet below)
+  cidr: <10.x.x.x/xx>       # (optional, must match CIDR used by the given VPC)
+  clusterEndpoints:
+    publicAccess: false
+    privateAccess: true
+  controlPlaneSecurityGroupIDs: [<sg-01>] #Providing existing security group. Skip to create a new one
+  subnets:
+    # must provide 'private' and/or 'public' subnets by availability zone as shown
+    private:
+      <az-01>:
+        id: <subnet-01>
+        cidr: <10.x.x.x/xx> # (optional, must match CIDR used by the given subnet)
+      <az-02>:
+        id: <subnet-02>
+        cidr: <10.x.x.x/xx>
+    public:
+      <az-01>:
+        id: <subnet-03>
+        cidr: "10.x.x.x/xx"
+      <az-02>:
+        id: <subnet-04>
+        cidr: "10.x.x.x/xx"
+
+addons:
+# - name: vpc-cni # no version is specified so it deploys the default version
+#   attachPolicyARNs:
+#     - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+# - name: coredns
+#   version: latest # auto discovers the latest available
+# - name: kube-proxy
+#   version: latest
+- name: aws-ebs-csi-driver
+  wellKnownPolicies:      # add IAM and service account
+    ebsCSIController: true
+# - name: amazon-cloudwatch-observability
+#   attachPolicyARNs:
+#     - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+
+nodeGroups: []
