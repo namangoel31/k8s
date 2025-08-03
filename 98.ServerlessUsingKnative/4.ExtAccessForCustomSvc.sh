@@ -11,6 +11,8 @@
 #add our load balancer to domain config of kourier service
 ######## ALB NAME NEEDS TO BE PROVIDEDE by USER ########
 
+ALB_NAME=''
+
 ALB_ARN=$(aws elbv2 describe-load-balancers \
   --names "$ALB_NAME" \
   --query 'LoadBalancers[0].LoadBalancerArn' \
@@ -89,3 +91,5 @@ aws elbv2 create-rule --listener-arn "$LISTENER_ARN" --priority 1 \
 --conditions 'Field=path-pattern,Values="/filemanager/*","/filemanager"' \
 --actions Type=forward,TargetGroupArn="$TG_ARN"
 
+
+#et voila!! Now you can hit your knative service using curl.
