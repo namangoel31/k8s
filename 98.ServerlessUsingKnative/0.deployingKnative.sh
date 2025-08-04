@@ -23,4 +23,7 @@ kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1
 kubectl get pods -n knative-serving
 
 #Configuring DNS (Magic DNC (sslip.io))
-kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.18.1/serving-default-domain.yaml
+# kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.18.1/serving-default-domain.yaml
+
+#creating knative hpa
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.19.0/serving-hpa.yaml
