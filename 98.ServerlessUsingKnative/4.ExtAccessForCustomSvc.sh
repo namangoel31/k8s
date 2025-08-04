@@ -12,16 +12,49 @@
 ######## ALB NAME NEEDS TO BE PROVIDEDE by USER ########
 
 ALB_NAME=''
+SCHEME="internet-facing"   # or "internal"
+VPC_ID=""
+SUBNETS="subnet-aaa subnet-bbb"   # space-separated list. DO NOT LISTEN TO CHATGPT
+SECURITY_GROUPS=""
+TAGS="Key=<keyName>,Value=<Value>"
+TG_NAME=""
 
+echo "Checking if ALB '${ALB_NAME}' exists..."
 ALB_ARN=$(aws elbv2 describe-load-balancers \
-  --names "$ALB_NAME" \
-  --query 'LoadBalancers[0].LoadBalancerArn' \
-  --output text)
+    --names "${ALB_NAME}" \
+    --query "LoadBalancers[0].LoadBalancerArn" \
+    --output text 2>/dev/null)
 
-if [ "$ALB_ARN" == "None" ]; then
-    echo "ERROR: ALB '$ALB_NAME' not found."
-    exit 1
+if [[ "$ALB_ARN" != "None" && -n "$ALB_ARN" ]]; then
+    echo "ALB already exists: $ALB_ARN"
+else
+    echo "ALB not found. Creating..."
+    ALB_ARN=$(aws elbv2 create-load-balancer \
+        --name "${ALB_NAME}" \
+        --scheme "${SCHEME}" \
+        --type application \
+        --subnets ${SUBNETS} \
+        --security-groups ${SECURITY_GROUPS} \
+        --tags ${TAGS} \
+        --query "LoadBalancers[0].LoadBalancerArn" \
+        --output text)
+
+    if [[ $? -eq 0 ]]; then
+        echo "ALB created successfully: $ALB_ARN"
+    else
+        echo "Failed to create ALB"
+    fi
 fi
+
+# ALB_ARN=$(aws elbv2 describe-load-balancers \
+#   --names "$ALB_NAME" \
+#   --query 'LoadBalancers[0].LoadBalancerArn' \
+#   --output text)
+
+# if [ "$ALB_ARN" == "None" ]; then
+#     echo "ERROR: ALB '$ALB_NAME' not found."
+#     exit 1
+# fi
 
 ALB_DNS=$(aws elbv2 describe-load-balancers \
   --load-balancer-arns "$ALB_ARN" \
@@ -53,11 +86,11 @@ lbip2=${lbips[1]}
 
 #now create a target group and register these IPs at targets in the target group
 TG_ARN=$(aws elbv2 create-target-group \
-  --name my-kourier-tg \
+  --name $TG_NAME \
   --protocol HTTP \
   --port 80 \
   --target-type ip \
-  --vpc-id $VPCID \
+  --vpc-id $VPC_ID \
   --query 'TargetGroups[0].TargetGroupArn' \
   --output text)
 
@@ -65,11 +98,10 @@ aws elbv2 register-targets \
   --target-group-arn "$TG_ARN" \
   --targets Id=$lbip1 Id=$lbip2
 
-PORT=80
 
 LISTENER_ARN=$(aws elbv2 describe-listeners \
   --load-balancer-arn "$ALB_ARN" \
-  --query "Listeners[?Port==\`$PORT\`].ListenerArn" \
+  --query "Listeners[?Port==\`80\`].ListenerArn" \
   --output text)
 
 if [ -z "$LISTENER_ARN" ]; then
@@ -77,7 +109,7 @@ if [ -z "$LISTENER_ARN" ]; then
     LISTENER_ARN=$(aws elbv2 create-listener \
       --load-balancer-arn "$ALB_ARN" \
       --protocol HTTP \
-      --port $PORT \
+      --port 80 \
       --default-actions Type=fixed-response,FixedResponseConfig="{StatusCode=404,ContentType=text/plain,MessageBody=\"Not Found\"}" \
       --query 'Listeners[0].ListenerArn' \
       --output text)
