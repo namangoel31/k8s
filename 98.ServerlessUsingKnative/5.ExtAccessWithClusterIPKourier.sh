@@ -155,4 +155,8 @@ EOF
 #create a target group binging using the manifest file created above
 kubectl create -f tgBinding.yaml
 
+# create you knative service 
 # AND CURL!!!
+# curl http://<alb-DNS> -H <serviceName>.<namespace>.<alb-DNS>
+
+# to stop passing header, we need to put up DNS records.
