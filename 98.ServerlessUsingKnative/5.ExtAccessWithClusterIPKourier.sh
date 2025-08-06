@@ -35,7 +35,7 @@ SECURITY_GROUPS=""
 TAGS="Key=<keyName>,Value=<Value>"
 TG_NAME=""
 CLIENT_NAME=""
-BINDING_NAME="${CLIENT_NAME}-tgBinding"
+BINDING_NAME="${CLIENT_NAME}-tgbinding" #should be lowecase
 
 
 #patching kourier service to use ClusterIP type service instead of LoadBalancer type svc
@@ -159,4 +159,12 @@ kubectl create -f tgBinding.yaml
 # AND CURL!!!
 # curl http://<alb-DNS> -H <serviceName>.<namespace>.<alb-DNS>
 
+
+#####################################################################################################
 # to stop passing header, we need to put up DNS records.
+# To access with curl without a header:
+
+# make a DNS Aname entry with desired domain which resolves to your alb. "*.something.someDomain.com"
+# put this domain in your knative-serving config-domain config map -> something.someDomain.com
+# now curl: curl <serviceName>.<namespace>.something.someDomain.com
+######################################################################################################
