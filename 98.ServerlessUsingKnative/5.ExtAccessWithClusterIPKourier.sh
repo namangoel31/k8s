@@ -165,6 +165,6 @@ kubectl create -f tgBinding.yaml
 # To access with curl without a header:
 
 # make a DNS Aname entry with desired domain which resolves to your alb. "*.something.someDomain.com"
-# put this domain in your knative-serving config-domain config map -> something.someDomain.com
+# put this domain, "something.someDomain.com", in your knative-serving config-domain config map
 # now curl: curl <serviceName>.<namespace>.something.someDomain.com
 ######################################################################################################
